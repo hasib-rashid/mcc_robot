@@ -123,12 +123,12 @@
     <button onclick="startTalking()"></button>
   </div>
     <script src="https://js.puter.com/v2/"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=w5EoCh7f"></script>
     <script>
         const mouth = document.getElementById("mouth");
         const leftEar = document.getElementById("left-ear");
         const rightEar = document.getElementById("right-ear");
         const stopBtn = document.getElementById("stopBtn");
-        
 
         function startListening() {
         if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
@@ -148,15 +148,14 @@
         recognition.start();
 
         recognition.onresult = async function (event) {
+          console.log(event.results[0][0].transcript)
             const transcript = event.results[0][0].transcript;
-            console.log("Heard:", transcript);
             const response = await puter.ai.chat(`Lets say we are in a science fair, Now answer my question as a physics demonstrator accruately, If I ask any other question other than Physics related. You will deny to answer. Now answer this question: ${transcript}`);
-            console.log()
-            respond(response);
+            respond(transcript);
         };
 
         stopBtn.addEventListener("click", () => {
-            window.speechSynthesis.cancel();
+            responsiveVoice.cancel();
             mouth.style.animation = "none";
         });
 
@@ -178,20 +177,44 @@
             respond(message);
         }
 
+        const startBtn = document.getElementById('startBtn');
+
+        startBtn.addEventListener('click', () => {
+          resultDiv.textContent = 'Listening...';
+          recognition.start();
+        });
+
+
+      responsiveVoice.setDefaultRate(1);
+
+        async function askAndSpeak(input) {
+          mouth.style.animation = "none"; // reset mouth animation
+          console.log(input)
+
+          try {
+            const response = await puter.ai.chat(input);
+            const message = response.message.content;
+            if (typeof message === "string" && message.trim() !== "") {
+              responsiveVoice.speak(message, "UK English Male", {
+                onstart: () => {
+                  mouth.style.animation = "speak 0.3s infinite";
+                },
+                onend: () => {
+                  mouth.style.animation = "none";
+                }
+              });
+            } else {
+              console.warn("Received empty or invalid response.");
+            }
+
+          } catch (err) {
+            console.error("Error while speaking:", err);
+          }
+        }
+
+        // This function is triggered when the voice recognition input is ready
         function respond(message) {
-            const utterance = new SpeechSynthesisUtterance(message);
-
-            utterance.onstart = () => {
-                mouth.style.animation = "speak 0.3s infinite";
-            };
-
-            utterance.onend = () => {
-                mouth.style.animation = "none";
-            };
-            
-            utterance.rate = 0.7
-
-            speechSynthesis.speak(utterance);
+          askAndSpeak(message);
         }
     </script>
 </body>
