@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Robot Face</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .robot-face {
+      width: 300px;
+      height: 300px;
+      background: #444;
+      border-radius: 20px;
+      position: relative;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ear {
+      width: 20px;
+      height: 60px;
+      background: #333;
+      position: absolute;
+      top: 90px;
+      border-radius: 10px;
+      transition: box-shadow 0.3s;
+    }
+
+    .left-ear {
+      left: -30px;
+    }
+
+    .right-ear {
+      right: -30px;
+    }
+
+    .ear.listening {
+      box-shadow: 0 0 15px 5px #0ff;
+    }
+
+    .eyes {
+      display: flex;
+      justify-content: space-around;
+      width: 80%;
+      margin-bottom: 30px;
+    }
+
+    .eye {
+      width: 50px;
+      height: 50px;
+      background: #000;
+      border-radius: 50%;
+      box-shadow: inset 0 0 10px #0ff, 0 0 10px #0ff;
+    }
+
+    .mouth {
+      width: 100px;
+      height: 30px;
+      background: #222;
+      border-radius: 0 0 50% 50%;
+      transition: transform 0.2s;
+      animation: none;
+    }
+
+    @keyframes speak {
+      0%   { transform: scaleY(1); }
+      50%  { transform: scaleY(1.5); }
+      100% { transform: scaleY(1); }
+    }
+
+    .buttons {
+      margin-top: 30px;
+      display: flex;
+      gap: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #0ff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #000;
+      box-shadow: 0 0 10px #0ff;
+    }
+
+    button:hover {
+      background: #0cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="robot-face">
+    <div class="ear left-ear" id="left-ear"></div>
+    <div class="ear right-ear" id="right-ear"></div>
+
+    <div class="eyes">
+      <div class="eye left-eye"></div>
+      <div class="eye right-eye"></div>
+    </div>
+
+    <div class="mouth" id="mouth"></div>
+  </div>
+
+  <div class="buttons">
+    <button onclick="startListening()">Start Listening</button>
+    <button id="stopBtn">Stop</button>
+    <button onclick="startTalking()"></button>
+  </div>
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        const mouth = document.getElementById("mouth");
+        const leftEar = document.getElementById("left-ear");
+        const rightEar = document.getElementById("right-ear");
+        const stopBtn = document.getElementById("stopBtn");
+        
+
+        function startListening() {
+        if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+            alert("Speech Recognition not supported in this browser.");
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        leftEar.classList.add("listening");
+        rightEar.classList.add("listening");
+
+        recognition.start();
+
+        recognition.onresult = async function (event) {
+            const transcript = event.results[0][0].transcript;
+            console.log("Heard:", transcript);
+            const response = await puter.ai.chat(`Lets say we are in a science fair, Now answer my question as a physics demonstrator accruately, If I ask any other question other than Physics related. You will deny to answer. Now answer this question: ${transcript}`);
+            console.log()
+            respond(response);
+        };
+
+        stopBtn.addEventListener("click", () => {
+            window.speechSynthesis.cancel();
+            mouth.style.animation = "none";
+        });
+
+
+        recognition.onerror = function (event) {
+            console.error("Recognition error:", event.error);
+            leftEar.classList.remove("listening");
+            rightEar.classList.remove("listening");
+        };
+
+        recognition.onend = function () {
+            leftEar.classList.remove("listening");
+            rightEar.classList.remove("listening");
+        };
+        }
+
+        function startTalking() {
+            const message = "Greetings sir. I am a physics demonstrator of todays exhibition in my group Physics of Fozlul Haque House. Ask me any questions related to physics and I will make you understand with accurate information.";
+            respond(message);
+        }
+
+        function respond(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+
+            utterance.onstart = () => {
+                mouth.style.animation = "speak 0.3s infinite";
+            };
+
+            utterance.onend = () => {
+                mouth.style.animation = "none";
+            };
+            
+            utterance.rate = 0.7
+
+            speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>
