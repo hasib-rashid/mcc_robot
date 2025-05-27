@@ -150,8 +150,9 @@
         recognition.onresult = async function (event) {
           console.log(event.results[0][0].transcript)
             const transcript = event.results[0][0].transcript;
-            const response = await puter.ai.chat(`Lets say we are in a science fair, Now answer my question as a physics demonstrator accruately, If I ask any other question other than Physics related. You will not answer the question. You will state any other sources to look for. Make the physics related answers short and concise. Now answer this question: ${transcript}`);
-            respond(transcript);
+            const response = await puter.ai.chat(`Lets say we are in a science fair, Now answer my question as a physics expert accruately, If I ask any other question other than Physics related. You will politely deny to answer the question. You will state any other sources to look for. Make the physics related answers short and concise. I am not summarizing anything, I will be asking plain question. You will start by saying, "Thats a great question". Now answer my question: ${transcript}`);
+            console.log(response.message.content)
+            respond(`Lets say we are in a science fair, Now answer my question as a physics expert accruately, If I ask any other question other than Physics related. You will politely deny to answer the question. You will state any other sources to look for. Make the physics related answers short and concise. I am not summarizing anything, I will be asking plain question. You will start by saying, "Thats a great question". Now answer my question: ${transcript}`);
         };
 
         stopBtn.addEventListener("click", () => {
@@ -173,8 +174,15 @@
         }
 
         function startTalking() {
-            const message = "Greetings sir. I am a physics demonstrator of todays exhibition in my group Physics of Fozlul Haque House. Ask me any questions related to physics and I will make you understand with accurate information.";
-            respond(message);
+            const message = "Greetings sir. Myself Physion. I am a physics specialized robot of todays exhibition in my group Physics of Fozlul Hoq House. Ask me any questions related to physics and I will make you understand with accurate information.";
+            responsiveVoice.speak(message, "UK English Male", {
+                onstart: () => {
+                  mouth.style.animation = "speak 0.3s infinite";
+                },
+                onend: () => {
+                  mouth.style.animation = "none";
+                }
+            })
         }
 
         const startBtn = document.getElementById('startBtn');
