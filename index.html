@@ -2,228 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Interactive Robot Face</title>
-  <style>
-    body {
-      background: #111;
-      color: white;
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .robot-face {
-      width: 300px;
-      height: 300px;
-      background: #444;
-      border-radius: 20px;
-      position: relative;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .ear {
-      width: 20px;
-      height: 60px;
-      background: #333;
-      position: absolute;
-      top: 90px;
-      border-radius: 10px;
-      transition: box-shadow 0.3s;
-    }
-
-    .left-ear {
-      left: -30px;
-    }
-
-    .right-ear {
-      right: -30px;
-    }
-
-    .ear.listening {
-      box-shadow: 0 0 15px 5px #0ff;
-    }
-
-    .eyes {
-      display: flex;
-      justify-content: space-around;
-      width: 80%;
-      margin-bottom: 30px;
-    }
-
-    .eye {
-      width: 50px;
-      height: 50px;
-      background: #000;
-      border-radius: 50%;
-      box-shadow: inset 0 0 10px #0ff, 0 0 10px #0ff;
-    }
-
-    .mouth {
-      width: 100px;
-      height: 30px;
-      background: #222;
-      border-radius: 0 0 50% 50%;
-      transition: transform 0.2s;
-      animation: none;
-    }
-
-    @keyframes speak {
-      0%   { transform: scaleY(1); }
-      50%  { transform: scaleY(1.5); }
-      100% { transform: scaleY(1); }
-    }
-
-    .buttons {
-      margin-top: 30px;
-      display: flex;
-      gap: 20px;
-    }
-
-    button {
-      padding: 10px 20px;
-      background: #0ff;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      color: #000;
-      box-shadow: 0 0 10px #0ff;
-    }
-
-    button:hover {
-      background: #0cc;
-    }
-  </style>
+  <title>Voice AI Chatbot</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="robot-face">
-    <div class="ear left-ear" id="left-ear"></div>
-    <div class="ear right-ear" id="right-ear"></div>
 
-    <div class="eyes">
-      <div class="eye left-eye"></div>
-      <div class="eye right-eye"></div>
+  <h1>🤖 Voice AI Chatbot</h1>
+
+  <div id="robot-face">
+    <div class="ear" id="left-ear"></div>
+    <div class="ear" id="right-ear"></div>
+
+    <div class="eye" id="left-eye">
+      <div class="pupil"></div>
+    </div>
+    <div class="eye" id="right-eye">
+      <div class="pupil"></div>
     </div>
 
-    <div class="mouth" id="mouth"></div>
+    <div id="mouth"></div>
   </div>
 
-  <div class="buttons">
-    <button onclick="startListening()">Start Listening</button>
-    <button id="stopBtn">Stop</button>
-    <button onclick="startTalking()"></button>
+  <div>
+    <button id="btnIntro">Introduction</button>
+    <button id="btnAsk">Ask a Question</button>
+    <button id="btnStop">Stop Answer</button>
   </div>
-    <script src="https://js.puter.com/v2/"></script>
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=w5EoCh7f"></script>
-    <script>
-        const mouth = document.getElementById("mouth");
-        const leftEar = document.getElementById("left-ear");
-        const rightEar = document.getElementById("right-ear");
-        const stopBtn = document.getElementById("stopBtn");
 
-        function startListening() {
-        if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-            alert("Speech Recognition not supported in this browser.");
-            return;
-        }
-
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
-        leftEar.classList.add("listening");
-        rightEar.classList.add("listening");
-
-        recognition.start();
-
-        recognition.onresult = async function (event) {
-          console.log(event.results[0][0].transcript)
-            const transcript = event.results[0][0].transcript;
-            const response = await puter.ai.chat(`Lets say we are in a science fair, Now answer my question as a physics expert accruately, If I ask any other question other than Physics related. You will politely deny to answer the question. You will state any other sources to look for. Make the physics related answers short and concise. I am not summarizing anything, I will be asking plain question. You will start by saying, "Thats a great question". Now answer my question: ${transcript}`);
-            console.log(response.message.content)
-            respond(`Lets say we are in a science fair, Now answer my question as a physics expert accruately, If I ask any other question other than Physics related. You will politely deny to answer the question. You will state any other sources to look for. Make the physics related answers short and concise. I am not summarizing anything, I will be asking plain question. You will start by saying, "Thats a great question". Now answer my question: ${transcript}`);
-        };
-
-        stopBtn.addEventListener("click", () => {
-            responsiveVoice.cancel();
-            mouth.style.animation = "none";
-        });
-
-
-        recognition.onerror = function (event) {
-            console.error("Recognition error:", event.error);
-            leftEar.classList.remove("listening");
-            rightEar.classList.remove("listening");
-        };
-
-        recognition.onend = function () {
-            leftEar.classList.remove("listening");
-            rightEar.classList.remove("listening");
-        };
-        }
-
-        function startTalking() {
-            const message = "Greetings sir. Myself Physion. I am a physics specialized robot of todays exhibition in my group Physics of Fozlul Hoq House. Ask me any questions related to physics and I will make you understand with accurate information.";
-            responsiveVoice.speak(message, "UK English Male", {
-                onstart: () => {
-                  mouth.style.animation = "speak 0.3s infinite";
-                },
-                onend: () => {
-                  mouth.style.animation = "none";
-                }
-            })
-        }
-
-        const startBtn = document.getElementById('startBtn');
-
-        startBtn.addEventListener('click', () => {
-          resultDiv.textContent = 'Listening...';
-          recognition.start();
-        });
-
-
-      responsiveVoice.setDefaultRate(1);
-
-        async function askAndSpeak(input) {
-          mouth.style.animation = "none"; // reset mouth animation
-          console.log(input)
-
-          try {
-            const response = await puter.ai.chat(input);
-            const message = response.message.content;
-            if (typeof message === "string" && message.trim() !== "") {
-              responsiveVoice.speak(message, "UK English Male", {
-                onstart: () => {
-                  mouth.style.animation = "speak 0.3s infinite";
-                },
-                onend: () => {
-                  mouth.style.animation = "none";
-                }
-              });
-            } else {
-              console.warn("Received empty or invalid response.");
-            }
-
-          } catch (err) {
-            console.error("Error while speaking:", err);
-          }
-        }
-
-        // This function is triggered when the voice recognition input is ready
-        function respond(message) {
-          askAndSpeak(message);
-        }
-    </script>
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="js/script.js"></script>
 </body>
 </html>
